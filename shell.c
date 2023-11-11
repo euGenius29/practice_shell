@@ -15,6 +15,8 @@ int main(int argc, char *argv[], char *envp[])
 	pid_t child;
 	int status, count;
 
+	(void)argc;
+	(void)envp;
 	buffer = NULL;
 	len = 0;
 	delim = " \n\r";
