@@ -9,14 +9,14 @@
  */
 int main(int argc, char *argv[], char *envp[])
 {
-	char *buffer, *delim, *args[1024];
+	char *buffer, *exec, *delim, *args[1024];
 	size_t len;
 	ssize_t read;
 	pid_t child;
 	int status, count;
 
 	(void)argc;
-	(void)envp;
+	(void)argv;
 	buffer = NULL;
 	len = 0;
 	delim = " \n\r";
@@ -40,18 +40,16 @@ int main(int argc, char *argv[], char *envp[])
 		if (strcmp(args[0], "exit") == 0)
 			exit_shell();
 		if (strcmp(args[0], "env") == 0)
-			_printenv();
-
-		if (!(command_check(args[0])))
 		{
-			printf("%s: %d: %s: not found\n", argv[0], count - (count - 1), args[0]);
+			for (count = 0; envp[count] != NULL; count++)
+				printf("%s\n", envp[count]);
 			continue;
 		}
-		if (!(realpath(args[0], NULL)))
+		exec = resolve_realpath(args[0]);
+		if (exec == NULL)
 		{
-			perror("Error:");
-			free(buffer);
-			return (-1);
+			printf("Error updating PATH\n");
+			continue;
 		}
 		child = fork();
 		if (child == -1)
@@ -62,10 +60,11 @@ int main(int argc, char *argv[], char *envp[])
 		}
 		if (child == 0)
 		{
-			if (execve(args[0], args, NULL) == -1)
+			if (execve(exec, args, NULL) == -1)
 			{
 				perror("Error:");
 				free(buffer);
+				free(exec);
 				return (-1);
 			}
 		}
@@ -75,5 +74,6 @@ int main(int argc, char *argv[], char *envp[])
 		}
 	}
 	free(buffer);
+	free(exec);
 	return (0);
 }

@@ -7,17 +7,15 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <string.h>
-
-
-extern char **environ;
-
+#include <limits.h>
 
 
 
-int command_check(const char *command);
-void exit_shell();
-void _printenv();
-int perror_buf();
+
+
+
+void exit_shell(void);
+char *resolve_realpath(char *command);
 
 #endif
 
